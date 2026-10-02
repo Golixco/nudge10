@@ -10,6 +10,7 @@ Nudge10 turns large, vague tasks into tiny 10-minute focus missions, protects ac
 
 - **Live Web Application:** [https://nudge10-9tli.onrender.com](https://nudge10-9tli.onrender.com)
 - **GitHub Repository:** [https://github.com/Golixco/nudge10](https://github.com/Golixco/nudge10)
+- **YouTube Video:** [https://youtu.be/sl0vxohgzsM?si=fzaGLlbtBTCoQXcc](https://youtu.be/sl0vxohgzsM?si=fzaGLlbtBTCoQXcc)
 
 The live production application runs on Render, serving both the FastAPI REST API and the static web client.
 
