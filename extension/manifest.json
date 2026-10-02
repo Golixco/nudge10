@@ -9,7 +9,7 @@
   "host_permissions": [
     "http://localhost:8000/*",
     "http://127.0.0.1:8000/*",
-    "https://*.onrender.com/*",
+    "https://nudge10-9tli.onrender.com/*",
     "https://*.youtube.com/*",
     "https://*.instagram.com/*",
     "https://*.reddit.com/*",
@@ -24,7 +24,7 @@
       "matches": [
         "http://localhost:8000/*",
         "http://127.0.0.1:8000/*",
-        "https://*.onrender.com/*",
+        "https://nudge10-9tli.onrender.com/*",
         "https://*.youtube.com/*",
         "https://*.instagram.com/*",
         "https://*.reddit.com/*",

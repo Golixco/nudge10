@@ -105,3 +105,22 @@
   - Render startup simulated on port 10000 with `APP_ENV=production`; verified `GET /api/health` returns 200 OK and `GET /` serves HTML frontend.
   - Expanded test suite to 85 passing tests.
 
+## 2026-10-02 — Stage 10D: Chrome extension switched to live Render deployment
+
+- Extension Production Configuration:
+  - Updated `extension/config.js` to target the live Render deployment:
+    - `API_BASE_URL`: `https://nudge10-9tli.onrender.com`
+    - `WEB_APP_URL`: `https://nudge10-9tli.onrender.com`
+  - Preserved commented `http://localhost:8000` fallback for local development testing.
+  - Zero secrets in extension: strictly zero API keys, assistant IDs, or tokens embedded in client files.
+- Manifest Permission Hardening:
+  - Updated `extension/manifest.json`:
+    - Replaced broad `https://*.onrender.com/*` in `host_permissions` and `content_scripts.matches` with exact production host: `https://nudge10-9tli.onrender.com/*`.
+    - Preserved `http://localhost:8000/*` and `http://127.0.0.1:8000/*` for local development.
+    - Preserved all 5 distraction domain permissions (`youtube.com`, `instagram.com`, `reddit.com`, `x.com`, `twitter.com`).
+- Documentation & Tests:
+  - Updated `README.md` to document both the live production Render URL (`https://nudge10-9tli.onrender.com`) and local development URL (`http://localhost:8000`).
+  - Updated `tests/test_extension.py` to assert the presence of `https://nudge10-9tli.onrender.com/*` and absence of wildcard `https://*.onrender.com/*`.
+  - All automated tests, Node syntax checks, and secret scans passed.
+
+

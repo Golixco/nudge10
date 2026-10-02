@@ -48,6 +48,10 @@ def test_manifest_v3_and_least_privilege():
     assert any("reddit.com" in h for h in host_perms)
     assert any("x.com" in h for h in host_perms)
     assert any("twitter.com" in h for h in host_perms)
+    assert "https://*.onrender.com/*" not in host_perms, "Wildcard onrender.com permission must be replaced with exact host"
+    assert "https://nudge10-9tli.onrender.com/*" in host_perms, "Exact Render host permission must be present"
+    assert "http://localhost:8000/*" in host_perms, "Localhost development permission must be preserved"
+
 
 
 def test_no_secrets_in_extension_files():

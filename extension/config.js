@@ -3,17 +3,13 @@
 // Do NOT add any Backboard API keys or secrets here.
 
 const NUDGE10_CONFIG = {
-  // Active configuration (default: local development)
-  // For local development: keep http://localhost:8000
-  API_BASE_URL: 'http://localhost:8000',
-  WEB_APP_URL: 'http://localhost:8000',
+  // Live Render production service deployment
+  API_BASE_URL: 'https://nudge10-9tli.onrender.com',
+  WEB_APP_URL: 'https://nudge10-9tli.onrender.com',
 
-  // Production Render deployment placeholder:
-  // Once your service is deployed on Render, update API_BASE_URL & WEB_APP_URL below
-  // to your exact service URL (e.g. 'https://nudge10.onrender.com') and narrow
-  // host_permissions in manifest.json to that exact host. Do NOT use wildcards.
-  // PRODUCTION_API_BASE_URL: 'https://YOUR-SERVICE-NAME.onrender.com',
-  // PRODUCTION_WEB_APP_URL: 'https://YOUR-SERVICE-NAME.onrender.com',
+  // Local development fallback (uncomment for local development testing):
+  // API_BASE_URL: 'http://localhost:8000',
+  // WEB_APP_URL: 'http://localhost:8000',
 
   // Allowed distraction categories (normalized)
   DISTRACTION_CATEGORIES: [
