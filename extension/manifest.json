@@ -1,18 +1,42 @@
 {
   "manifest_version": 3,
-  "name": "Nudge10 — Anti-Doomscrolling Companion",
-  "version": "0.1.0",
-  "description": "Detect distracting sites during a Nudge10 focus session and surface a tiny intervention.",
-  "permissions": ["tabs", "storage"],
-  "host_permissions": ["<all_urls>"],
-  "background": { "service_worker": "background.js" },
+  "name": "Nudge10 — Anti-Doomscrolling Focus Companion",
+  "version": "0.2.0",
+  "description": "Protects your 10-minute focus sessions by detecting distraction sites and surfacing real AI interventions.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*",
+    "https://*.onrender.com/*",
+    "https://*.youtube.com/*",
+    "https://*.instagram.com/*",
+    "https://*.reddit.com/*",
+    "https://*.x.com/*",
+    "https://*.twitter.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "http://localhost:8000/*",
+        "http://127.0.0.1:8000/*",
+        "https://*.onrender.com/*",
+        "https://*.youtube.com/*",
+        "https://*.instagram.com/*",
+        "https://*.reddit.com/*",
+        "https://*.x.com/*",
+        "https://*.twitter.com/*"
+      ],
       "js": ["config.js", "content.js"],
       "css": ["overlay.css"],
       "run_at": "document_idle"
     }
   ],
-  "action": { "default_title": "Nudge10" }
+  "action": {
+    "default_title": "Nudge10 Focus Protection"
+  }
 }

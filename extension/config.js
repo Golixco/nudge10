@@ -1,16 +1,31 @@
-// Change this after deploying Nudge10 on Render.
+// extension/config.js
+// Nudge10 Extension Configuration
+// Do NOT add any Backboard API keys or secrets here.
+
 const NUDGE10_CONFIG = {
+  // Active configuration (default: local development)
+  // For local development: keep http://localhost:8000
+  API_BASE_URL: 'http://localhost:8000',
   WEB_APP_URL: 'http://localhost:8000',
-  DISTRACTION_HOSTS: [
+
+  // Production Render deployment placeholder:
+  // Once your service is deployed on Render, update API_BASE_URL & WEB_APP_URL below
+  // to your exact service URL (e.g. 'https://nudge10.onrender.com') and narrow
+  // host_permissions in manifest.json to that exact host. Do NOT use wildcards.
+  // PRODUCTION_API_BASE_URL: 'https://YOUR-SERVICE-NAME.onrender.com',
+  // PRODUCTION_WEB_APP_URL: 'https://YOUR-SERVICE-NAME.onrender.com',
+
+  // Allowed distraction categories (normalized)
+  DISTRACTION_CATEGORIES: [
     'youtube.com',
-    'www.youtube.com',
     'instagram.com',
-    'www.instagram.com',
     'reddit.com',
-    'www.reddit.com',
     'x.com',
-    'www.x.com',
-    'twitter.com',
-    'www.twitter.com'
+    'twitter.com'
   ]
+};
+
+// CommonJS export for Node validation and unit testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = NUDGE10_CONFIG;
 }

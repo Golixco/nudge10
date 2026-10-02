@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     backboard_model_name: str = "google/gemma-3-27b-it"
     app_env: str = "development"
 
+    @property
+    def is_production(self) -> bool:
+        return self.app_env.strip().lower() == "production"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

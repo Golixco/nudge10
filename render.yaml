@@ -4,6 +4,7 @@ services:
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
     envVars:
       - key: BACKBOARD_API_KEY
         sync: false
@@ -15,3 +16,4 @@ services:
         value: google/gemma-3-27b-it
       - key: APP_ENV
         value: production
+

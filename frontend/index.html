@@ -14,191 +14,844 @@
       <div class="nav-copy">Beat it for 10 minutes.</div>
     </header>
 
-    <section class="hero">
-      <div class="hero-copy">
+    <!-- ==========================================
+         VIEW 1: HOME (Task input)
+         ========================================== -->
+    <section class="home-grid view-active" data-view="home" id="viewHome">
+      <div class="home-copy">
         <div class="eyebrow">ANTI-DOOMSCROLLING EXPERIMENT</div>
-        <h1>Don’t fix your whole life.<br><span>Win the next 10 minutes.</span></h1>
-        <p>Nudge10 turns overwhelming tasks into tiny missions and gives you a personalized nudge when distraction tries to steal the session.</p>
+        <h1>Don’t fix your whole life.<br><em>Win the next 10 minutes.</em></h1>
+        <p>Nudge10 turns overwhelming tasks into concrete 10-minute actions and delivers personalized AI interventions when distraction tries to steal the session.</p>
       </div>
 
-      <div class="mission-card" id="missionCard">
-        <div class="card-kicker" id="cardKicker">MAKE A MISSION</div>
-        <h2 id="cardTitle">What are you avoiding?</h2>
-        <textarea id="task" rows="4" placeholder="e.g. Finish DBMS assignment"></textarea>
-        <button class="primary" id="makeMission">Make it 10 minutes →</button>
-        <div class="tiny-note">The AI should give you one concrete action, not a giant plan.</div>
+      <div class="task-card">
+        <div class="eyebrow">MAKE A MISSION</div>
+        <h2>What do you need to get done?</h2>
+        <textarea id="taskInput" rows="4" placeholder="e.g. Finish DBMS Assignment question 1"></textarea>
+        <button class="btn-primary" id="startMissionBtn" style="margin-top:14px;">Start 10-minute mission →</button>
+        <div class="tiny-note">The AI will extract one concrete action, not a giant 10-step plan.</div>
       </div>
     </section>
 
-    <section class="dashboard">
-      <div class="section-head">
-        <div><div class="eyebrow">TODAY</div><h3>Your focus loop</h3></div>
-        <button class="ghost" id="newMission">New mission</button>
-      </div>
-      <div class="stats">
-        <div class="stat"><span>Focus time</span><strong id="focusMinutes">0 min</strong><small>tracked locally</small></div>
-        <div class="stat"><span>Missions</span><strong id="missionsDone">0</strong><small>completed</small></div>
-        <div class="stat"><span>Distractions</span><strong id="distractionCount">0</strong><small>this session</small></div>
-        <div class="stat"><span>Rule</span><strong>10:00</strong><small>one mission at a time</small></div>
+    <!-- ==========================================
+         VIEW 2: MISSION (AI preview)
+         ========================================== -->
+    <section data-view="mission" id="viewMission">
+      <div class="mission-card">
+        <div class="mission-topline">
+          <div class="eyebrow">MISSION READY</div>
+          <div class="source-pill" id="missionSource">AI GENERATED</div>
+        </div>
+        <h2 id="missionTitle">Starting small</h2>
+        <div class="action-box" id="missionAction"></div>
+        <div class="why" id="missionReason"></div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:28px;">
+          <button class="btn-primary" id="startTimerBtn">START (10:00) →</button>
+          <button class="btn-ghost" id="editTaskBtn">Edit task</button>
+        </div>
       </div>
     </section>
 
+    <!-- ==========================================
+         VIEW 3: FOCUS (Active 10-minute countdown)
+         ========================================== -->
+    <section data-view="focus" id="viewFocus">
+      <div class="focus-shell">
+        <div class="focus-task-label">CURRENT MISSION</div>
+        <div class="focus-task-text" id="focusTask"></div>
+
+        <div class="timer-ring">
+          <svg viewBox="0 0 240 240" width="240" height="240">
+            <circle class="timer-ring__bg" cx="120" cy="120" r="108" />
+            <circle class="timer-ring__progress" id="timerProgressCircle" cx="120" cy="120" r="108" stroke-dasharray="678.58" stroke-dashoffset="0" />
+          </svg>
+          <div class="timer-digits">
+            <div class="clock" id="timerClock">10:00</div>
+            <div class="timer-label">REMAINING</div>
+          </div>
+        </div>
+
+        <div class="focus-action-card">
+          <div class="focus-action-label">ACTIVE ACTION</div>
+          <div id="focusAction"></div>
+        </div>
+
+        <div class="focus-buttons">
+          <button class="btn-primary" id="completeBtn">Complete ✓</button>
+          <button class="btn-ghost" id="abandonBtn">I need to stop</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 4: COMPLETE (Success screen)
+         ========================================== -->
+    <section data-view="complete" id="viewComplete">
+      <div class="complete-shell">
+        <div class="complete-icon">🎯</div>
+        <h2>Mission complete.</h2>
+        <div class="complete-meta" id="completeMeta">You focused for 10:00 on your mission.</div>
+        <div class="complete-line" id="completeLine">"That's a win. Small wins compound into momentum."</div>
+        <button class="btn-primary" id="newMissionFromComplete">Start another 10-minute mission →</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 5: ABANDON (No-shame exit screen)
+         ========================================== -->
+    <section data-view="abandon" id="viewAbandon">
+      <div class="abandon-shell">
+        <h2>Session stopped.</h2>
+        <p class="abandon-sub">No shame. Sometimes 10 minutes is too large of a bite.</p>
+        <div class="abandon-next">
+          <div class="abandon-next-label">SUGGESTED NEXT STEP</div>
+          <div id="abandonNextStep">Try breaking this task into a 3-minute starting action.</div>
+        </div>
+        <div class="abandon-buttons">
+          <button class="btn-primary" id="makeSmallerBtn">Make the task smaller →</button>
+          <button class="btn-ghost" id="returnHomeBtn">Return to task list</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         DASHBOARD SECTION (Persistent daily metrics)
+         ========================================== -->
+    <section class="dashboard-section">
+      <div class="dashboard-head">
+        <div>
+          <div class="eyebrow">TODAY'S MOMENTUM</div>
+          <h3>Your focus loop</h3>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card stat-card--accent">
+          <span class="stat-card__label">Today's Missions</span>
+          <span class="stat-card__value" id="statMissions">0</span>
+          <span class="stat-card__sub">started today</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Focus Minutes</span>
+          <span class="stat-card__value" id="statMinutes">0</span>
+          <span class="stat-card__sub">tracked locally</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Completed</span>
+          <span class="stat-card__value" id="statCompleted">0</span>
+          <span class="stat-card__sub">10-min sprints</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Abandoned</span>
+          <span class="stat-card__value" id="statAbandoned">0</span>
+          <span class="stat-card__sub">stopped early</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Distractions</span>
+          <span class="stat-card__value" id="statDistractions">0</span>
+          <span class="stat-card__sub">nudged back</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         DEMO PANEL (Simulate distraction events & Extension status)
+         ========================================== -->
     <section class="demo-panel">
-      <div>
-        <div class="eyebrow">DEMO MODE</div>
-        <h3>Trigger a distraction</h3>
-        <p>These buttons simulate what the browser extension will do when a distracting site is opened.</p>
+      <div class="demo-panel__copy">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+          <span class="demo-badge">DEVELOPMENT DEMO</span>
+          <div class="ext-status-pill" id="extStatusPill">
+            <span class="ext-status-dot" id="extStatusDot"></span>
+            <span id="extStatusText">Browser protection: Checking...</span>
+          </div>
+        </div>
+        <h3>Simulate or test distraction detection</h3>
+        <p>In production, the Chrome extension detects visits to distracting sites (YouTube, Instagram, Reddit, X) during an active session and surfaces an AI intervention. Test below or with the real extension unpacked.</p>
+        <div class="ext-diagnostics" id="extDiagnostics">
+          Extension connected: <strong id="diagExtConnected">Checking…</strong> &bull;
+          Active session: <strong id="diagActiveSession">None</strong> &bull;
+          Distractions: <strong id="diagDistractions">0</strong>
+        </div>
       </div>
       <div class="dist-buttons">
-        <button class="danger" data-distraction="YouTube Shorts">YouTube Shorts</button>
-        <button class="danger" data-distraction="Instagram">Instagram</button>
-        <button class="danger" data-distraction="Reddit">Reddit</button>
-        <button class="danger" data-distraction="X">X</button>
+        <button class="btn-danger" data-site="youtube.com">YouTube</button>
+        <button class="btn-danger" data-site="instagram.com">Instagram</button>
+        <button class="btn-danger" data-site="reddit.com">Reddit</button>
+        <button class="btn-danger" data-site="x.com">X</button>
       </div>
     </section>
 
     <footer>Built for one friend. Powered by open-weight AI. <span>© 2026 Nudge10</span></footer>
   </main>
 
+  <!-- ==========================================
+       AI NUDGE MODAL OVERLAY
+       ========================================== -->
   <div class="nudge-overlay" id="nudgeOverlay" hidden>
     <div class="nudge-modal">
-      <div class="eyebrow" id="nudgeKicker">NUDGE</div>
-      <h2 id="nudgeMessage"></h2>
-      <div class="action-box yellow" id="nudgeAction"></div>
-      <button class="primary" id="backToWork">Back to work</button>
-      <button class="ghost full" id="dismissNudge">Dismiss</button>
+      <div class="eyebrow" id="nudgeKicker">DISTRACTION NUDGE</div>
+      <h2 id="nudgeMessage">You left your mission.</h2>
+      <div class="action-box yellow" id="nudgeAction">Close the tab and finish the current step.</div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+        <button class="btn-primary" id="backToWorkBtn">Back to work</button>
+        <button class="btn-ghost" id="dismissNudgeBtn">Dismiss</button>
+      </div>
     </div>
   </div>
 
 <script>
 (() => {
-  const API = '/api';
-  const state = {
-    task: '', mission: null, seconds: 0, running: false,
-    distractionCount: 0,
-    sessions: Number(localStorage.getItem('nudge10_sessions') || 0),
-    focusMinutes: Number(localStorage.getItem('nudge10_focus') || 0),
+  'use strict';
+
+  // ---------------------------------------------------------------------------
+  // Storage Keys & Constants
+  // ---------------------------------------------------------------------------
+  const STORAGE_SESSION_KEY = 'nudge10_active_session';
+  const STORAGE_STATS_KEY = 'nudge10_daily_stats';
+  const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 108; // ~678.584
+
+  // ---------------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------------
+  let currentSession = null;
+  let timerInterval = null;
+  let suggestedSmallerTask = '';
+
+  // ---------------------------------------------------------------------------
+  // DOM Elements
+  // ---------------------------------------------------------------------------
+  const views = {
+    home: document.getElementById('viewHome'),
+    mission: document.getElementById('viewMission'),
+    focus: document.getElementById('viewFocus'),
+    complete: document.getElementById('viewComplete'),
+    abandon: document.getElementById('viewAbandon'),
   };
 
-  const $ = (id) => document.getElementById(id);
-  const taskEl = $('task');
-  const missionCard = $('missionCard');
-  const distractionCountEl = $('distractionCount');
-  const focusMinutesEl = $('focusMinutes');
-  const missionsDoneEl = $('missionsDone');
+  const taskInput = document.getElementById('taskInput');
+  const startMissionBtn = document.getElementById('startMissionBtn');
+  const missionSource = document.getElementById('missionSource');
+  const missionTitle = document.getElementById('missionTitle');
+  const missionAction = document.getElementById('missionAction');
+  const missionReason = document.getElementById('missionReason');
+  const startTimerBtn = document.getElementById('startTimerBtn');
+  const editTaskBtn = document.getElementById('editTaskBtn');
 
-  function renderStats() {
-    distractionCountEl.textContent = state.distractionCount;
-    focusMinutesEl.textContent = `${state.focusMinutes} min`;
-    missionsDoneEl.textContent = state.sessions;
+  const focusTask = document.getElementById('focusTask');
+  const focusAction = document.getElementById('focusAction');
+  const timerClock = document.getElementById('timerClock');
+  const timerCircle = document.getElementById('timerProgressCircle');
+  const completeBtn = document.getElementById('completeBtn');
+  const abandonBtn = document.getElementById('abandonBtn');
+
+  const completeMeta = document.getElementById('completeMeta');
+  const completeLine = document.getElementById('completeLine');
+  const newMissionFromComplete = document.getElementById('newMissionFromComplete');
+
+  const abandonNextStep = document.getElementById('abandonNextStep');
+  const makeSmallerBtn = document.getElementById('makeSmallerBtn');
+  const returnHomeBtn = document.getElementById('returnHomeBtn');
+
+  const statMissions = document.getElementById('statMissions');
+  const statMinutes = document.getElementById('statMinutes');
+  const statCompleted = document.getElementById('statCompleted');
+  const statAbandoned = document.getElementById('statAbandoned');
+  const statDistractions = document.getElementById('statDistractions');
+
+  const nudgeOverlay = document.getElementById('nudgeOverlay');
+  const nudgeKicker = document.getElementById('nudgeKicker');
+  const nudgeMessage = document.getElementById('nudgeMessage');
+  const nudgeAction = document.getElementById('nudgeAction');
+  const backToWorkBtn = document.getElementById('backToWorkBtn');
+  const dismissNudgeBtn = document.getElementById('dismissNudgeBtn');
+
+  // Extension status and diagnostics elements
+  const extStatusPill = document.getElementById('extStatusPill');
+  const extStatusDot = document.getElementById('extStatusDot');
+  const extStatusText = document.getElementById('extStatusText');
+  const diagExtConnected = document.getElementById('diagExtConnected');
+  const diagActiveSession = document.getElementById('diagActiveSession');
+  const diagDistractions = document.getElementById('diagDistractions');
+
+  // ---------------------------------------------------------------------------
+  // Chrome Extension Bridge (window.postMessage)
+  // ---------------------------------------------------------------------------
+  let isExtensionConnected = false;
+
+  function notifyExtension(type, data = {}) {
+    try {
+      window.postMessage({
+        source: 'nudge10-web',
+        type: type,
+        ...data,
+      }, '*');
+    } catch (err) {
+      console.warn('Could not postMessage to extension:', err);
+    }
   }
 
-  function renderMission() {
-    const m = state.mission;
-    if (!m) {
-      missionCard.innerHTML = `
-        <div class="card-kicker">MAKE A MISSION</div>
-        <h2>What are you avoiding?</h2>
-        <textarea id="task" rows="4" placeholder="e.g. Finish DBMS assignment"></textarea>
-        <button class="primary" id="makeMission">Make it 10 minutes →</button>
-        <div class="tiny-note">The AI should give you one concrete action, not a giant plan.</div>`;
-      document.getElementById('makeMission').onclick = createMission;
+  function setExtensionStatus(connected) {
+    isExtensionConnected = connected;
+    if (extStatusDot) {
+      extStatusDot.className = connected ? 'ext-status-dot ext-status-dot--active' : 'ext-status-dot ext-status-dot--inactive';
+    }
+    if (extStatusText) {
+      extStatusText.textContent = connected ? 'Browser protection: ON' : 'Browser protection: Extension not detected';
+    }
+    if (diagExtConnected) {
+      diagExtConnected.textContent = connected ? 'Yes' : 'No';
+      diagExtConnected.style.color = connected ? 'var(--accent)' : '#888';
+    }
+  }
+
+  function updateDiagnostics() {
+    if (diagActiveSession) {
+      diagActiveSession.textContent = currentSession && currentSession.status === 'active'
+        ? (currentSession.session_id.slice(0, 8) + '…')
+        : 'None';
+      diagActiveSession.style.color = currentSession && currentSession.status === 'active' ? 'var(--accent)' : '#888';
+    }
+    if (diagDistractions) {
+      const stats = loadStats();
+      diagDistractions.textContent = String(stats.distractions || 0);
+    }
+  }
+
+  // Listen for handshake from content script
+  window.addEventListener('message', (event) => {
+    if (event.source !== window) return;
+    if (!event.data || event.data.source !== 'nudge10-extension') return;
+
+    if (event.data.type === 'NUDGE10_EXTENSION_READY' || event.data.type === 'NUDGE10_PONG') {
+      setExtensionStatus(true);
+      if (currentSession && currentSession.status === 'active') {
+        notifyExtension('NUDGE10_SESSION_START', {
+          sessionId: currentSession.session_id,
+          startedAt: currentSession.started_at,
+          task: currentSession.task,
+          missionTitle: currentSession.mission?.title || '',
+        });
+      }
+    }
+  });
+
+  // Check extension availability via ping
+  notifyExtension('NUDGE10_PING');
+  setTimeout(() => {
+    if (!isExtensionConnected) {
+      setExtensionStatus(false);
+    }
+  }, 1000);
+
+  // ---------------------------------------------------------------------------
+  // View Router
+  // ---------------------------------------------------------------------------
+  function showView(viewName) {
+    Object.keys(views).forEach(k => {
+      if (views[k]) {
+        views[k].classList.toggle('view-active', k === viewName);
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Daily Stats Manager (localStorage)
+  // ---------------------------------------------------------------------------
+  function getTodayString() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORAGE_STATS_KEY);
+      if (!raw) return createFreshStats();
+      const parsed = JSON.parse(raw);
+      if (parsed.date !== getTodayString()) {
+        return createFreshStats();
+      }
+      return parsed;
+    } catch {
+      return createFreshStats();
+    }
+  }
+
+  function createFreshStats() {
+    const stats = {
+      date: getTodayString(),
+      missions: 0,
+      minutes: 0,
+      completed: 0,
+      abandoned: 0,
+      distractions: 0,
+    };
+    saveStats(stats);
+    return stats;
+  }
+
+  function saveStats(stats) {
+    try {
+      localStorage.setItem(STORAGE_STATS_KEY, JSON.stringify(stats));
+    } catch (e) {
+      console.warn('Could not save stats to localStorage', e);
+    }
+  }
+
+  function updateStatsDisplay() {
+    const stats = loadStats();
+    if (statMissions) statMissions.textContent = stats.missions;
+    if (statMinutes) statMinutes.textContent = stats.minutes;
+    if (statCompleted) statCompleted.textContent = stats.completed;
+    if (statAbandoned) statAbandoned.textContent = stats.abandoned;
+    if (statDistractions) statDistractions.textContent = stats.distractions;
+  }
+
+  function incrementStat(key, amount = 1) {
+    const stats = loadStats();
+    stats[key] = (stats[key] || 0) + amount;
+    saveStats(stats);
+    updateStatsDisplay();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Active Session Persistence (localStorage)
+  // ---------------------------------------------------------------------------
+  function saveCurrentSession(session) {
+    try {
+      if (!session) {
+        localStorage.removeItem(STORAGE_SESSION_KEY);
+      } else {
+        localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(session));
+      }
+    } catch (e) {
+      console.warn('Could not persist session to localStorage', e);
+    }
+  }
+
+  function loadSavedSession() {
+    try {
+      const raw = localStorage.getItem(STORAGE_SESSION_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Mission Creation & Session Start
+  // ---------------------------------------------------------------------------
+  async function handleStartMission() {
+    const task = (taskInput.value || '').trim();
+    if (!task) {
+      taskInput.focus();
       return;
     }
 
-    const pct = Math.min(state.seconds / 600, 1) * 100;
-    const mins = String(Math.floor(state.seconds / 60)).padStart(2, '0');
-    const secs = String(state.seconds % 60).padStart(2, '0');
-    missionCard.innerHTML = `
-      <div class="mission-topline"><div class="card-kicker">MISSION ACTIVE</div><div class="source-pill">${escapeHtml(m.source)}</div></div>
-      <h2>${escapeHtml(m.title)}</h2>
-      <div class="action-box">${escapeHtml(m.action)}</div>
-      <div class="timer">${mins}:${secs}</div>
-      <div class="progress"><div style="width:${pct}%"></div></div>
-      <div class="mission-actions">
-        ${!state.running && state.seconds < 600 ? `<button class="primary" id="startMission">Start 10-minute sprint</button>` : ''}
-        ${state.running ? `<button class="secondary" id="pauseMission">Pause</button>` : ''}
-        ${!state.running && state.seconds > 0 && state.seconds < 600 ? `<button class="ghost" id="resumeMission">Resume</button>` : ''}
-        <button class="ghost" id="resetMission">Reset</button>
-      </div>
-      ${state.seconds >= 600 ? `<div class="complete">Mission complete. That’s a win.</div>` : ''}
-      <div class="why">${escapeHtml(m.why)}</div>`;
+    startMissionBtn.disabled = true;
+    startMissionBtn.innerHTML = '<span class="loading-spinner"></span> Creating mission…';
 
-    $('startMission')?.addEventListener('click', () => { state.running = true; renderMission(); });
-    $('resumeMission')?.addEventListener('click', () => { state.running = true; renderMission(); });
-    $('pauseMission')?.addEventListener('click', () => { state.running = false; renderMission(); });
-    $('resetMission')?.addEventListener('click', () => { state.running = false; state.seconds = 0; renderMission(); });
-  }
-
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  }
-
-  async function createMission() {
-    const input = document.getElementById('task');
-    const task = (input?.value || '').trim() || 'Finish my DBMS assignment';
-    input?.setAttribute('disabled', 'true');
-    $('makeMission').textContent = 'Thinking…';
     try {
-      const response = await fetch(`${API}/mission`, {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({task, minutes:10})
+      const res = await fetch('/api/session/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task, duration_minutes: 10 }),
       });
-      state.task = task;
-      state.mission = await response.json();
-      state.seconds = 0; state.running = false; state.distractionCount = 0;
-    } catch {
-      state.task = task;
-      state.mission = { title:'Start tiny', action:`Work on the first step of: ${task}`, why:'Starting is easier when the target is small.', minutes:10, source:'offline-fallback' };
+
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      currentSession = {
+        session_id: data.session_id,
+        task: task,
+        mission: data.mission,
+        duration_minutes: data.duration_minutes || 10,
+        status: 'created',
+        started_at: null,
+        target_end_time: null,
+      };
+
+      saveCurrentSession(currentSession);
+      incrementStat('missions');
+
+      // Populate Mission View
+      missionTitle.textContent = data.mission.title || 'Start tiny';
+      missionAction.textContent = data.mission.action || `Work on: ${task}`;
+      missionReason.textContent = data.mission.reason || 'Starting small lowers resistance.';
+      
+      const isAI = data.mission.source === 'backboard';
+      missionSource.textContent = isAI ? '✦ NUDGE10 AI' : 'DEMO FALLBACK';
+      missionSource.className = isAI ? 'source-pill source-pill--ai' : 'source-pill';
+
+      showView('mission');
+    } catch (err) {
+      console.error('Session start error:', err);
+      // Fallback local session
+      currentSession = {
+        session_id: 'local-' + Date.now(),
+        task: task,
+        mission: {
+          title: 'Start with one tiny step',
+          action: `Work on the very first step of: ${task}`,
+          reason: 'Starting small lowers the friction to begin.',
+          source: 'offline-fallback',
+        },
+        duration_minutes: 10,
+        status: 'created',
+        started_at: null,
+        target_end_time: null,
+      };
+      saveCurrentSession(currentSession);
+      incrementStat('missions');
+
+      missionTitle.textContent = currentSession.mission.title;
+      missionAction.textContent = currentSession.mission.action;
+      missionReason.textContent = currentSession.mission.reason;
+      missionSource.textContent = 'OFFLINE';
+      missionSource.className = 'source-pill';
+      showView('mission');
+    } finally {
+      startMissionBtn.disabled = false;
+      startMissionBtn.textContent = 'Start 10-minute mission →';
     }
-    renderStats(); renderMission();
   }
 
-  async function triggerNudge(name) {
-    state.distractionCount += 1;
-    renderStats();
-    let data;
+  // ---------------------------------------------------------------------------
+  // Focus Timer Engine
+  // ---------------------------------------------------------------------------
+  function startFocusTimer() {
+    if (!currentSession) return;
+
+    const now = Date.now();
+    const durationSeconds = currentSession.duration_minutes * 60;
+
+    if (!currentSession.target_end_time) {
+      currentSession.started_at = now;
+      currentSession.target_end_time = now + durationSeconds * 1000;
+      currentSession.status = 'active';
+      saveCurrentSession(currentSession);
+    }
+
+    // Bridge notification to Chrome Extension
+    notifyExtension('NUDGE10_SESSION_START', {
+      sessionId: currentSession.session_id,
+      startedAt: currentSession.started_at,
+      task: currentSession.task,
+      missionTitle: currentSession.mission?.title || '',
+    });
+    updateDiagnostics();
+
+    focusTask.textContent = currentSession.task;
+    focusAction.textContent = currentSession.mission.action;
+
+    showView('focus');
+    updateTimerDisplay();
+
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(onTimerTick, 500);
+  }
+
+  function getRemainingSeconds() {
+    if (!currentSession || !currentSession.target_end_time) return 0;
+    const remainingMs = currentSession.target_end_time - Date.now();
+    return Math.max(0, Math.ceil(remainingMs / 1000));
+  }
+
+  function getElapsedSeconds() {
+    if (!currentSession) return 0;
+    const totalSecs = currentSession.duration_minutes * 60;
+    return Math.min(totalSecs, Math.max(0, totalSecs - getRemainingSeconds()));
+  }
+
+  function onTimerTick() {
+    const remaining = getRemainingSeconds();
+    updateTimerDisplay();
+
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      handleAutoTimeoutComplete();
+    }
+  }
+
+  function updateTimerDisplay() {
+    const remaining = getRemainingSeconds();
+    const totalSecs = (currentSession?.duration_minutes || 10) * 60;
+    const elapsed = totalSecs - remaining;
+
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    timerClock.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+    // Update ring progress (progress: 0 at start, 1 when complete)
+    const progress = Math.min(1, Math.max(0, elapsed / totalSecs));
+    const offset = CIRCLE_CIRCUMFERENCE * (1 - progress);
+    timerCircle.style.strokeDashoffset = offset.toFixed(2);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Complete Session
+  // ---------------------------------------------------------------------------
+  async function handleCompleteSession(isAuto = false) {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    if (!currentSession) {
+      showView('home');
+      return;
+    }
+
+    const elapsed = getElapsedSeconds() || (currentSession.duration_minutes * 60);
+    const elapsedMins = Math.floor(elapsed / 60);
+    const elapsedSecs = elapsed % 60;
+
+    completeBtn.disabled = true;
+    completeBtn.textContent = 'Saving…';
+
     try {
-      const response = await fetch(`${API}/nudge`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
+      const res = await fetch('/api/session/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          task: state.task || state.mission?.action || 'Current task',
-          elapsed_minutes: Math.floor(state.seconds/60),
-          distraction: name, distraction_count: state.distractionCount
-        })
+          session_id: currentSession.session_id,
+          elapsed_seconds: elapsed,
+        }),
       });
-      data = await response.json();
-    } catch {
-      data = { message:'You left the mission. Come back before the 10 minutes are up.', action:'Return to your task for the next 60 seconds.' };
+
+      let data = {};
+      if (res.ok) {
+        data = await res.json();
+      }
+
+      completeMeta.textContent = `Mission completed: "${currentSession.mission.action}". Focused for ${elapsedMins}:${String(elapsedSecs).padStart(2, '0')}.`;
+      completeLine.textContent = data.message || "That's a win. Small wins compound into momentum.";
+    } catch (e) {
+      console.warn('Session complete call failed:', e);
+      completeMeta.textContent = `Mission completed: "${currentSession.mission.action}". Focused for ${elapsedMins}:${String(elapsedSecs).padStart(2, '0')}.`;
+      completeLine.textContent = "Mission complete. That's a win.";
+    } finally {
+      completeBtn.disabled = false;
+      completeBtn.textContent = 'Complete ✓';
+
+      // Update daily stats
+      incrementStat('completed');
+      incrementStat('minutes', Math.max(1, Math.round(elapsed / 60)));
+
+      // Bridge notification to Chrome Extension
+      notifyExtension('NUDGE10_SESSION_END', {
+        sessionId: currentSession?.session_id,
+        reason: 'completed',
+      });
+
+      // Clear active session
+      saveCurrentSession(null);
+      currentSession = null;
+      updateDiagnostics();
+
+      showView('complete');
     }
-    $('nudgeKicker').textContent = `NUDGE #${state.distractionCount}`;
-    $('nudgeMessage').textContent = data.message;
-    $('nudgeAction').textContent = data.action;
-    $('nudgeOverlay').hidden = false;
   }
 
-  $('makeMission').onclick = createMission;
-  $('newMission').onclick = () => { state.mission = null; state.running = false; state.seconds = 0; renderMission(); };
-  document.querySelectorAll('[data-distraction]').forEach((button) => button.addEventListener('click', () => triggerNudge(button.dataset.distraction)));
-  $('backToWork').onclick = () => { $('nudgeOverlay').hidden = true; };
-  $('dismissNudge').onclick = () => { $('nudgeOverlay').hidden = true; };
+  function handleAutoTimeoutComplete() {
+    handleCompleteSession(true);
+  }
 
-  setInterval(() => {
-    if (!state.running) return;
-    state.seconds += 1;
-    if (state.seconds >= 600) {
-      state.seconds = 600;
-      state.running = false;
-      state.sessions += 1;
-      state.focusMinutes += 10;
-      localStorage.setItem('nudge10_sessions', String(state.sessions));
-      localStorage.setItem('nudge10_focus', String(state.focusMinutes));
-      renderStats();
+  // ---------------------------------------------------------------------------
+  // Abandon Session (No Shame)
+  // ---------------------------------------------------------------------------
+  async function handleAbandonSession() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
     }
-    renderMission();
-  }, 1000);
 
-  renderStats();
+    if (!currentSession) {
+      showView('home');
+      return;
+    }
+
+    const elapsed = getElapsedSeconds();
+
+    abandonBtn.disabled = true;
+    abandonBtn.textContent = 'Stopping…';
+
+    try {
+      const res = await fetch('/api/session/abandon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: currentSession.session_id,
+          elapsed_seconds: elapsed,
+          reason: 'stopped early by user',
+        }),
+      });
+
+      let nextStep = `Try working on just the first sentence of: ${currentSession.task}`;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.next_step) nextStep = data.next_step;
+      }
+      suggestedSmallerTask = nextStep;
+      abandonNextStep.textContent = nextStep;
+    } catch (e) {
+      console.warn('Abandon API call error:', e);
+      suggestedSmallerTask = `Write the very first sentence of: ${currentSession.task}`;
+      abandonNextStep.textContent = suggestedSmallerTask;
+    } finally {
+      abandonBtn.disabled = false;
+      abandonBtn.textContent = 'I need to stop';
+
+      incrementStat('abandoned');
+      if (elapsed >= 60) {
+        incrementStat('minutes', Math.floor(elapsed / 60));
+      }
+
+      // Bridge notification to Chrome Extension
+      notifyExtension('NUDGE10_SESSION_END', {
+        sessionId: currentSession?.session_id,
+        reason: 'abandoned',
+      });
+
+      saveCurrentSession(null);
+      currentSession = null;
+      updateDiagnostics();
+
+      showView('abandon');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Distraction Handling & Interventions
+  // ---------------------------------------------------------------------------
+  async function handleDistraction(site) {
+    incrementStat('distractions');
+    updateDiagnostics();
+
+    const elapsed = getElapsedSeconds();
+    const sessionId = currentSession?.session_id || 'demo-session';
+
+    try {
+      const res = await fetch('/api/session/distraction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          site: site,
+          elapsed_seconds: elapsed,
+        }),
+      });
+
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      nudgeKicker.textContent = `DISTRACTION: ${site.toUpperCase()}`;
+      nudgeMessage.textContent = data.message;
+      nudgeAction.textContent = data.action;
+      nudgeOverlay.hidden = false;
+    } catch (e) {
+      console.warn('Distraction nudge error:', e);
+      nudgeKicker.textContent = `DISTRACTION: ${site.toUpperCase()}`;
+      nudgeMessage.textContent = `You opened ${site}. Your mission is still waiting.`;
+      nudgeAction.textContent = 'Close the tab and return to the current step.';
+      nudgeOverlay.hidden = false;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Event Listeners
+  // ---------------------------------------------------------------------------
+  startMissionBtn.addEventListener('click', handleStartMission);
+  taskInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      handleStartMission();
+    }
+  });
+
+  startTimerBtn.addEventListener('click', startFocusTimer);
+
+  editTaskBtn.addEventListener('click', () => {
+    if (currentSession?.task) {
+      taskInput.value = currentSession.task;
+    }
+    saveCurrentSession(null);
+    currentSession = null;
+    showView('home');
+  });
+
+  completeBtn.addEventListener('click', () => handleCompleteSession(false));
+  abandonBtn.addEventListener('click', handleAbandonSession);
+
+  newMissionFromComplete.addEventListener('click', () => {
+    taskInput.value = '';
+    showView('home');
+  });
+
+  makeSmallerBtn.addEventListener('click', () => {
+    taskInput.value = suggestedSmallerTask || '';
+    showView('home');
+    taskInput.focus();
+  });
+
+  returnHomeBtn.addEventListener('click', () => {
+    taskInput.value = '';
+    showView('home');
+  });
+
+  // Distraction Buttons
+  document.querySelectorAll('[data-site]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const site = btn.getAttribute('data-site');
+      handleDistraction(site);
+    });
+  });
+
+  backToWorkBtn.addEventListener('click', () => {
+    nudgeOverlay.hidden = true;
+  });
+
+  dismissNudgeBtn.addEventListener('click', () => {
+    nudgeOverlay.hidden = true;
+  });
+
+  // Handle visibility changes (accurate time across tab switching)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && currentSession && currentSession.status === 'active') {
+      onTimerTick();
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // Initial Page Load & Session Restoration
+  // ---------------------------------------------------------------------------
+  updateStatsDisplay();
+  updateDiagnostics();
+
+  const saved = loadSavedSession();
+  if (saved && saved.status === 'active' && saved.target_end_time) {
+    const now = Date.now();
+    if (now >= saved.target_end_time) {
+      // Session finished while page was closed/refreshed
+      currentSession = saved;
+      handleAutoTimeoutComplete();
+    } else {
+      // Session still active — seamlessly resume timer!
+      currentSession = saved;
+      startFocusTimer();
+    }
+  } else if (saved && saved.status === 'created') {
+    // Session was created and previewing mission
+    currentSession = saved;
+    missionTitle.textContent = saved.mission.title || 'Start tiny';
+    missionAction.textContent = saved.mission.action || `Work on: ${saved.task}`;
+    missionReason.textContent = saved.mission.reason || 'Starting small lowers resistance.';
+    const isAI = saved.mission.source === 'backboard';
+    missionSource.textContent = isAI ? '✦ NUDGE10 AI' : 'DEMO FALLBACK';
+    missionSource.className = isAI ? 'source-pill source-pill--ai' : 'source-pill';
+    showView('mission');
+  } else {
+    showView('home');
+  }
+
 })();
 </script>
 </body>
