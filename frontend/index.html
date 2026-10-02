@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#070707" />
+  <title>Nudge10 — Beat it for 10 minutes</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="nav">
+      <div class="brand"><span class="brand-dot"></span>Nudge10</div>
+      <div class="nav-copy">Beat it for 10 minutes.</div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">ANTI-DOOMSCROLLING EXPERIMENT</div>
+        <h1>Don’t fix your whole life.<br><span>Win the next 10 minutes.</span></h1>
+        <p>Nudge10 turns overwhelming tasks into tiny missions and gives you a personalized nudge when distraction tries to steal the session.</p>
+      </div>
+
+      <div class="mission-card" id="missionCard">
+        <div class="card-kicker" id="cardKicker">MAKE A MISSION</div>
+        <h2 id="cardTitle">What are you avoiding?</h2>
+        <textarea id="task" rows="4" placeholder="e.g. Finish DBMS assignment"></textarea>
+        <button class="primary" id="makeMission">Make it 10 minutes →</button>
+        <div class="tiny-note">The AI should give you one concrete action, not a giant plan.</div>
+      </div>
+    </section>
+
+    <section class="dashboard">
+      <div class="section-head">
+        <div><div class="eyebrow">TODAY</div><h3>Your focus loop</h3></div>
+        <button class="ghost" id="newMission">New mission</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>Focus time</span><strong id="focusMinutes">0 min</strong><small>tracked locally</small></div>
+        <div class="stat"><span>Missions</span><strong id="missionsDone">0</strong><small>completed</small></div>
+        <div class="stat"><span>Distractions</span><strong id="distractionCount">0</strong><small>this session</small></div>
+        <div class="stat"><span>Rule</span><strong>10:00</strong><small>one mission at a time</small></div>
+      </div>
+    </section>
+
+    <section class="demo-panel">
+      <div>
+        <div class="eyebrow">DEMO MODE</div>
+        <h3>Trigger a distraction</h3>
+        <p>These buttons simulate what the browser extension will do when a distracting site is opened.</p>
+      </div>
+      <div class="dist-buttons">
+        <button class="danger" data-distraction="YouTube Shorts">YouTube Shorts</button>
+        <button class="danger" data-distraction="Instagram">Instagram</button>
+        <button class="danger" data-distraction="Reddit">Reddit</button>
+        <button class="danger" data-distraction="X">X</button>
+      </div>
+    </section>
+
+    <footer>Built for one friend. Powered by open-weight AI. <span>© 2026 Nudge10</span></footer>
+  </main>
+
+  <div class="nudge-overlay" id="nudgeOverlay" hidden>
+    <div class="nudge-modal">
+      <div class="eyebrow" id="nudgeKicker">NUDGE</div>
+      <h2 id="nudgeMessage"></h2>
+      <div class="action-box yellow" id="nudgeAction"></div>
+      <button class="primary" id="backToWork">Back to work</button>
+      <button class="ghost full" id="dismissNudge">Dismiss</button>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const API = '/api';
+  const state = {
+    task: '', mission: null, seconds: 0, running: false,
+    distractionCount: 0,
+    sessions: Number(localStorage.getItem('nudge10_sessions') || 0),
+    focusMinutes: Number(localStorage.getItem('nudge10_focus') || 0),
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const taskEl = $('task');
+  const missionCard = $('missionCard');
+  const distractionCountEl = $('distractionCount');
+  const focusMinutesEl = $('focusMinutes');
+  const missionsDoneEl = $('missionsDone');
+
+  function renderStats() {
+    distractionCountEl.textContent = state.distractionCount;
+    focusMinutesEl.textContent = `${state.focusMinutes} min`;
+    missionsDoneEl.textContent = state.sessions;
+  }
+
+  function renderMission() {
+    const m = state.mission;
+    if (!m) {
+      missionCard.innerHTML = `
+        <div class="card-kicker">MAKE A MISSION</div>
+        <h2>What are you avoiding?</h2>
+        <textarea id="task" rows="4" placeholder="e.g. Finish DBMS assignment"></textarea>
+        <button class="primary" id="makeMission">Make it 10 minutes →</button>
+        <div class="tiny-note">The AI should give you one concrete action, not a giant plan.</div>`;
+      document.getElementById('makeMission').onclick = createMission;
+      return;
+    }
+
+    const pct = Math.min(state.seconds / 600, 1) * 100;
+    const mins = String(Math.floor(state.seconds / 60)).padStart(2, '0');
+    const secs = String(state.seconds % 60).padStart(2, '0');
+    missionCard.innerHTML = `
+      <div class="mission-topline"><div class="card-kicker">MISSION ACTIVE</div><div class="source-pill">${escapeHtml(m.source)}</div></div>
+      <h2>${escapeHtml(m.title)}</h2>
+      <div class="action-box">${escapeHtml(m.action)}</div>
+      <div class="timer">${mins}:${secs}</div>
+      <div class="progress"><div style="width:${pct}%"></div></div>
+      <div class="mission-actions">
+        ${!state.running && state.seconds < 600 ? `<button class="primary" id="startMission">Start 10-minute sprint</button>` : ''}
+        ${state.running ? `<button class="secondary" id="pauseMission">Pause</button>` : ''}
+        ${!state.running && state.seconds > 0 && state.seconds < 600 ? `<button class="ghost" id="resumeMission">Resume</button>` : ''}
+        <button class="ghost" id="resetMission">Reset</button>
+      </div>
+      ${state.seconds >= 600 ? `<div class="complete">Mission complete. That’s a win.</div>` : ''}
+      <div class="why">${escapeHtml(m.why)}</div>`;
+
+    $('startMission')?.addEventListener('click', () => { state.running = true; renderMission(); });
+    $('resumeMission')?.addEventListener('click', () => { state.running = true; renderMission(); });
+    $('pauseMission')?.addEventListener('click', () => { state.running = false; renderMission(); });
+    $('resetMission')?.addEventListener('click', () => { state.running = false; state.seconds = 0; renderMission(); });
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+
+  async function createMission() {
+    const input = document.getElementById('task');
+    const task = (input?.value || '').trim() || 'Finish my DBMS assignment';
+    input?.setAttribute('disabled', 'true');
+    $('makeMission').textContent = 'Thinking…';
+    try {
+      const response = await fetch(`${API}/mission`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({task, minutes:10})
+      });
+      state.task = task;
+      state.mission = await response.json();
+      state.seconds = 0; state.running = false; state.distractionCount = 0;
+    } catch {
+      state.task = task;
+      state.mission = { title:'Start tiny', action:`Work on the first step of: ${task}`, why:'Starting is easier when the target is small.', minutes:10, source:'offline-fallback' };
+    }
+    renderStats(); renderMission();
+  }
+
+  async function triggerNudge(name) {
+    state.distractionCount += 1;
+    renderStats();
+    let data;
+    try {
+      const response = await fetch(`${API}/nudge`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          task: state.task || state.mission?.action || 'Current task',
+          elapsed_minutes: Math.floor(state.seconds/60),
+          distraction: name, distraction_count: state.distractionCount
+        })
+      });
+      data = await response.json();
+    } catch {
+      data = { message:'You left the mission. Come back before the 10 minutes are up.', action:'Return to your task for the next 60 seconds.' };
+    }
+    $('nudgeKicker').textContent = `NUDGE #${state.distractionCount}`;
+    $('nudgeMessage').textContent = data.message;
+    $('nudgeAction').textContent = data.action;
+    $('nudgeOverlay').hidden = false;
+  }
+
+  $('makeMission').onclick = createMission;
+  $('newMission').onclick = () => { state.mission = null; state.running = false; state.seconds = 0; renderMission(); };
+  document.querySelectorAll('[data-distraction]').forEach((button) => button.addEventListener('click', () => triggerNudge(button.dataset.distraction)));
+  $('backToWork').onclick = () => { $('nudgeOverlay').hidden = true; };
+  $('dismissNudge').onclick = () => { $('nudgeOverlay').hidden = true; };
+
+  setInterval(() => {
+    if (!state.running) return;
+    state.seconds += 1;
+    if (state.seconds >= 600) {
+      state.seconds = 600;
+      state.running = false;
+      state.sessions += 1;
+      state.focusMinutes += 10;
+      localStorage.setItem('nudge10_sessions', String(state.sessions));
+      localStorage.setItem('nudge10_focus', String(state.focusMinutes));
+      renderStats();
+    }
+    renderMission();
+  }, 1000);
+
+  renderStats();
+})();
+</script>
+</body>
+</html>

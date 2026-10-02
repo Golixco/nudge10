@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: nudge10
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: BACKBOARD_API_KEY
+        sync: false
+      - key: BACKBOARD_ASSISTANT_ID
+        sync: false
+      - key: BACKBOARD_MODEL_PROVIDER
+        value: openrouter
+      - key: BACKBOARD_MODEL_NAME
+        value: google/gemma-3-27b-it
+      - key: APP_ENV
+        value: production

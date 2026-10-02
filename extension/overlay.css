@@ -1,0 +1,25 @@
+#nudge10-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, .72);
+  backdrop-filter: blur(9px);
+  display: grid;
+  place-items: center;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+.n10-card {
+  width: min(520px, calc(100vw - 32px));
+  padding: 30px;
+  background: #101010;
+  color: #fff;
+  border: 1px solid #363636;
+  border-radius: 28px;
+  box-shadow: 0 30px 100px rgba(0,0,0,.72);
+}
+.n10-kicker { font-size: 10px; letter-spacing: .18em; font-weight: 800; color: #e7ff3f; }
+.n10-title { font-size: 34px; font-weight: 900; letter-spacing: -.05em; line-height: 1.02; margin-top: 15px; }
+.n10-copy { color:#8f8f8f; line-height:1.55; margin:14px 0 24px; }
+.n10-row { display:flex; gap:10px; flex-wrap:wrap; }
+.n10-row button { border-radius: 12px; border: 1px solid #2d2d2d; padding: 12px 15px; background:#191919; color:#fff; font-weight:800; }
+.n10-row #n10-back { background:#e7ff3f; color:#080808; border-color:#e7ff3f; }

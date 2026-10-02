@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Nudge10 — Anti-Doomscrolling Companion",
+  "version": "0.1.0",
+  "description": "Detect distracting sites during a Nudge10 focus session and surface a tiny intervention.",
+  "permissions": ["tabs", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["config.js", "content.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_title": "Nudge10" }
+}
